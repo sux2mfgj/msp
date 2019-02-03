@@ -6,7 +6,7 @@ namespace msp {
 namespace client {
 
 Client::Client() :
-    port(io),
+    socket(io),
     running_(ATOMIC_FLAG_INIT),
     log_level_(SILENT),
     msp_ver_(1),
@@ -30,8 +30,8 @@ void Client::setVariant(const FirmwareVariant& v) { fw_variant = v; }
 
 FirmwareVariant Client::getVariant() { return fw_variant; }
 
-bool Client::start(const std::string& device, const size_t baudrate) {
-    return connectPort(device, baudrate) && startReadThread() &&
+bool Client::start(const int port) {
+    return connectPort(port) && startReadThread() &&
            startSubscriptions();
 }
 
@@ -39,27 +39,31 @@ bool Client::stop() {
     return disconnectPort() && stopReadThread() && stopSubscriptions();
 }
 
-bool Client::connectPort(const std::string& device, const size_t baudrate) {
+bool Client::connectPort(const int port) {
     asio::error_code ec;
-    port.open(device, ec);
+    //port.open(device, ec);
+    socket.connect(
+            asio::ip::tcp::endpoint(
+                asio::ip::address::from_string("127.0.0.1"), port), 
+            ec);
     if(ec) return false;
-    port.set_option(asio::serial_port::baud_rate(baudrate));
-    port.set_option(asio::serial_port::parity(asio::serial_port::parity::none));
-    port.set_option(asio::serial_port::character_size(
-        asio::serial_port::character_size(8)));
-    port.set_option(
-        asio::serial_port::stop_bits(asio::serial_port::stop_bits::one));
+    //port.set_option(asio::serial_port::baud_rate(baudrate));
+    //port.set_option(asio::serial_port::parity(asio::serial_port::parity::none));
+    //port.set_option(asio::serial_port::character_size(
+    //    asio::serial_port::character_size(8)));
+    //port.set_option(
+    //    asio::serial_port::stop_bits(asio::serial_port::stop_bits::one));
     return true;
 }
 
 bool Client::disconnectPort() {
     asio::error_code ec;
-    port.close(ec);
+    socket.close(ec);
     if(ec) return false;
     return true;
 }
 
-bool Client::isConnected() { return port.is_open(); }
+bool Client::isConnected() { return socket.is_open(); }
 
 bool Client::startReadThread() {
     // no point reading if we arent connected to anything
@@ -68,7 +72,7 @@ bool Client::startReadThread() {
     if(running_.test_and_set()) return false;
     // hit it!
     thread = std::thread([this] {
-        asio::async_read_until(port,
+        asio::async_read_until(socket,
                                buffer,
                                std::bind(&Client::messageReady,
                                          this,
@@ -180,7 +184,7 @@ uint8_t Client::extractChar() {
         if(log_level_ >= WARNING)
             std::cerr << "buffer returned EOF; reading char directly from port"
                       << std::endl;
-        asio::read(port, buffer, asio::transfer_exactly(1));
+        asio::read(socket, buffer, asio::transfer_exactly(1));
     }
     return uint8_t(buffer.sbumpc());
 }
@@ -200,7 +204,7 @@ bool Client::sendData(const msp::ID id, const ByteVector& data) {
     {
         std::lock_guard<std::mutex> lock(mutex_send);
         bytes_written =
-            asio::write(port, asio::buffer(msg.data(), msg.size()), ec);
+            asio::write(socket, asio::buffer(msg.data(), msg.size()), ec);
     }
     if(ec == asio::error::operation_aborted && log_level_ >= WARNING) {
         // operation_aborted error probably means the client is being closed
@@ -327,7 +331,7 @@ void Client::processOneMessage(const asio::error_code& ec,
         }
     }
 
-    asio::async_read_until(port,
+    asio::async_read_until(socket,
                            buffer,
                            std::bind(&Client::messageReady,
                                      this,

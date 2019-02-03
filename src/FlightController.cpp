@@ -11,9 +11,9 @@ FlightController::FlightController() :
 
 FlightController::~FlightController() { disconnect(); }
 
-bool FlightController::connect(const std::string &device, const size_t baudrate,
+bool FlightController::connect(const int port,
                                const double &timeout) {
-    if(!client_.start(device, baudrate)) return false;
+    if(!client_.start(port)) return false;
 
     msp::msg::FcVariant fcvar(fw_variant_);
     if(client_.sendMessage(fcvar, timeout)) {
@@ -267,8 +267,8 @@ bool FlightController::setRc(const std::vector<uint16_t> channels) {
     return client_.sendMessageNoWait(rc);
 }
 
-bool FlightController::setMotors(
-    const std::array<uint16_t, msp::msg::N_MOTOR> &motor_values) {
+bool FlightController::setMotors(const std::array<uint16_t, msp::msg::N_MOTOR> &motor_values) 
+{
     msp::msg::SetMotor motor(fw_variant_);
     motor.motor = motor_values;
     return client_.sendMessage(motor);

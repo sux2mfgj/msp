@@ -14,13 +14,16 @@
 
 #include <FlightController.hpp>
 
-int main(int argc, char *argv[]) {
-    const std::string device =
-        (argc > 1) ? std::string(argv[1]) : "/dev/ttyUSB0";
-    const size_t baudrate = (argc > 2) ? std::stoul(argv[2]) : 115200;
+int main(int argc, char* argv[]) 
+{
+    int port = 5761;
+    if(argc > 1)
+    {
+        port = atoi(argv[1]);
+    }
 
     fcu::FlightController fcu;
-    fcu.connect(device, baudrate);
+    fcu.connect(port);
 
     // spin motors 1 to 4
     fcu.setMotors({1100, 1100, 1100, 1100, 0, 0, 0, 0});

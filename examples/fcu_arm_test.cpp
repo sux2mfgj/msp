@@ -18,10 +18,12 @@ and motors will turn!
 #include <chrono>
 #include <iostream>
 
-int main(int argc, char *argv[]) {
-    const std::string device =
-        (argc > 1) ? std::string(argv[1]) : "/dev/ttyUSB0";
-    const size_t baudrate = (argc > 2) ? std::stoul(argv[2]) : 115200;
+//int main(int argc, char *argv[]) {
+int main() {
+    //const std::string device =
+    //    (argc > 1) ? std::string(argv[1]) : "/dev/ttyUSB0";
+    //const size_t baudrate = (argc > 2) ? std::stoul(argv[2]) : 115200;
+    const int port = 6571;
 
     std::chrono::high_resolution_clock::time_point start, end;
     // bool feature_changed = false;
@@ -32,7 +34,7 @@ int main(int argc, char *argv[]) {
     // wait until connection is established
     // get unique box IDs
     start = std::chrono::high_resolution_clock::now();
-    fcu.connect(device, baudrate);
+    fcu.connect(port);
     end = std::chrono::high_resolution_clock::now();
     std::cout << "ready after: "
               << std::chrono::duration_cast<std::chrono::milliseconds>(end -

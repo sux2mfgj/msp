@@ -68,15 +68,12 @@ public:
 private:
 };
 
-int main(int argc, char* argv[]) {
-    const std::string device =
-        (argc > 1) ? std::string(argv[1]) : "/dev/ttyUSB0";
-    const size_t baudrate = (argc > 2) ? std::stoul(argv[2]) : 115200;
-
+int main() {
+    const int port = 6134;
     fcu::FlightController fcu;
     fcu.setLoggingLevel(msp::client::LoggingLevel::INFO);
     // wait for connection
-    fcu.connect(device, baudrate);
+    fcu.connect(port);
 
     App app("MultiWii");
 

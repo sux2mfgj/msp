@@ -83,7 +83,7 @@ public:
      * @brief Start communications with a flight controller
      * @return True on success
      */
-    bool start(const std::string& device, const size_t baudrate = 115200);
+    bool start(const int port);
 
     /**
      * @brief Stop communications with a flight controller
@@ -224,7 +224,7 @@ protected:
      * @brief Establish connection to serial device and start read thread
      * @return True on success
      */
-    bool connectPort(const std::string& device, const size_t baudrate = 115200);
+    bool connectPort(const int port);
 
     /**
      * @brief Break connection to serial device and stop read thread
@@ -333,7 +333,8 @@ protected:
 
 protected:
     asio::io_service io;     ///<! io service
-    asio::serial_port port;  ///<! port for serial device
+    //asio::serial_port port;  ///<! port for serial device
+    asio::ip::tcp::socket socket;
     asio::streambuf buffer;
 
     // read thread management

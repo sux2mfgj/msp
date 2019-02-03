@@ -34,7 +34,7 @@ public:
      * @param timeout Timeout passed to each internal operation (seconds)
      * @return True on success
      */
-    bool connect(const std::string &device, const size_t baudrate = 115200,
+    bool connect(const int port,
                  const double &timeout = 0.0);
 
     /**

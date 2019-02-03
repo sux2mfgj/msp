@@ -24,14 +24,12 @@ struct Callbacks {
     }
 };
 
-int main(int argc, char *argv[]) {
-    const std::string device =
-        (argc > 1) ? std::string(argv[1]) : "/dev/ttyUSB0";
-    const size_t baudrate = (argc > 2) ? std::stoul(argv[2]) : 115200;
+int main() {
+    const int port = 1612;
 
     Callbacks cbs;
     fcu::FlightController fcu;
-    fcu.connect(device, baudrate);
+    fcu.connect(port);
 
     // subscribe with costum type
     fcu.subscribe(&Callbacks::onIdent, &cbs, 1);

@@ -68,15 +68,14 @@ static bool running = true;
 
 void onExit(int /*signal*/) { running = false; }
 
-int main(int argc, char* argv[]) {
-    const std::string device =
-        (argc > 1) ? std::string(argv[1]) : "/dev/ttyUSB0";
-    const size_t baudrate = (argc > 2) ? std::stoul(argv[2]) : 115200;
+//int main(int argc, char* argv[]) {
+int main() {
+    const int port = 5612;
 
     SubCallbacks subs;
 
     msp::client::Client client;
-    client.start(device, baudrate);
+    client.start(port);
 
     // using lambda callback with stored function object
     const std::function<void(const msp::msg::RawImu&)> imu_cb2 =
